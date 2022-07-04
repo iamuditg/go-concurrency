@@ -1,0 +1,22 @@
+- The Go scheduler is part of the go runtime. It is known as M:N scheduler.
+- Go Scheduler runs in user space.
+- Go scheduler uses OS threads to schedule goroutines for execution.
+- Go routines runs in the context of os threads.
+
+- Go runtime create number of worker OS threads, equal to GOMAXPROCS.
+- GOMAXPROCS - default value is number of processors on machine
+- GO scheduler distributes runnable goroutine over multiple worker OS threads.
+- At any time, N goroutines could be scheduled on M OS threads that runs on at most GOMAXPROCS numbers of processors.
+
+- As of GO 1.14, Go scheduler implements asynchronous preemption.
+- this prevents long running goroutines from hogging onto CPU, that could block other goroutines.
+- the asynchronous preemtion is triggered based on a time condition. when a goroutine is runtime for more than 10ms, Go will try to preempt it.
+
+NETPOLLER
+- Netpoller to convert asynchronous system call to blocking system call.
+- when a goroutine makes a asynchronous system call, and file descriptor is not ready, goroutine is parked at netpoller os thread.
+- netpoller uses interface provided by os to do polling on file descriptors
+  - kqueue(MacOS) ,epoll(linux), iocp(windows)
+- Netpoller gets notification from os, when file descriptor is ready for i/o operations.
+- netpoller notifies goroutine to retry i/o operation.
+- complexity of managing asynchronous system call is moved from applicaiton to go runtime, which manages it efficiently.
